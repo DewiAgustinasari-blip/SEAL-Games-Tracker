@@ -47,8 +47,8 @@
 
     <style>
         body {
-            background-color: #FFFDF9;
-            background-image: radial-gradient(#FBCFE8 1.2px, transparent 1.2px), radial-gradient(#FEF08A 1.2px, #FFFDF9 1.2px);
+            background-color: #FFF8F6;
+            background-image: radial-gradient(#FBCFE8 1.2px, transparent 1.2px), radial-gradient(#FEF08A 1.2px, #FFF8F6 1.2px);
             background-size: 28px 28px;
             background-position: 0 0, 14px 14px;
         }
@@ -96,8 +96,8 @@
     <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-pinksoft-100 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center gap-2">
             <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-pinksoft-300 to-yellowsoft-300 flex items-center justify-center shadow-md text-white text-lg sm:text-xl font-display font-bold shrink-0">
-                    🌸
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-pinksoft-300 to-yellowsoft-300 flex items-center justify-center shadow-md text-white text-lg sm:text-2xl font-display font-bold shrink-0">
+                    🦭
                 </div>
                 <div>
                     <h1 class="font-display font-extrabold text-lg sm:text-2xl text-slate-800 tracking-tight flex items-center gap-2">
@@ -109,6 +109,9 @@
 
             <!-- Admin Toggle & Mode Badge -->
             <div class="flex items-center gap-2">
+                <div id="syncBadge" class="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span id="syncText">Live Syncing</span>
+                </div>
                 <div id="adminBadge" class="hidden sm:flex items-center gap-1.5 bg-rose-50 text-rose-500 text-xs font-bold px-3 py-1.5 rounded-xl border border-rose-200">
                     <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> Mode Admin Active
                 </div>
@@ -129,10 +132,10 @@
             <div class="relative z-10 max-w-2xl">
                 <div class="flex flex-wrap items-center gap-2 mb-2">
                     <span class="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md text-pinksoft-500 text-xs font-extrabold px-3 py-1 rounded-full border border-pinksoft-200 shadow-2xs">
-                        <i class="fa-solid fa-bolt text-yellowsoft-400"></i> Real-time Local Sync
+                        <i class="fa-solid fa-bolt text-yellowsoft-400"></i> Real-time Cloud Sync
                     </span>
-                    <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Active Storage
+                    <span id="storageStatusBadge" class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Cloud DB Connected
                     </span>
                 </div>
                 <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1.5 leading-tight">
@@ -233,7 +236,7 @@
     <!-- Custom Confirmation Dialog Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-200 bounce-modal text-center">
-            <div class="w-12 h-12 bg-rose-100 text-rose-500 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3">
+            <div id="confirmIconContainer" class="w-12 h-12 bg-rose-100 text-rose-500 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <h3 id="confirmTitle" class="font-display font-extrabold text-base text-slate-800 mb-1">Konfirmasi Hapus</h3>
@@ -298,14 +301,17 @@
         <p>✨ UKM SEAL — Interactive Real-time Games Tracker ✨</p>
     </footer>
 
-    <script>
-        // App Local Storage Key & Default Data State
-        const STORAGE_KEY = 'ukm_seal_tracker_v3';
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Application Configuration & Storage Setup
         const ADMIN_PIN = "seal2026";
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ukm-seal-games-tracker';
 
-        let isAdmin = false;
-
-        let defaultTeams = [
+        // Default Data Sets
+        const defaultTeams = [
             { id: 1, name: "Kelompok 1", completedGames: [] },
             { id: 2, name: "Kelompok 2", completedGames: [] },
             { id: 3, name: "Kelompok 3", completedGames: [] },
@@ -313,7 +319,7 @@
             { id: 5, name: "Kelompok 5", completedGames: [] }
         ];
 
-        let defaultGames = [
+        const defaultGames = [
             "Estafet Tepung",
             "Tebak Gaya",
             "Makan Kerupuk",
@@ -321,16 +327,69 @@
             "Lari Karung"
         ];
 
+        let isAdmin = false;
         let teams = [];
         let gamesList = [];
-        
         let promptCallback = null;
         let confirmCallback = null;
+        let db = null;
+        let auth = null;
+        let docRef = null;
 
-        // Initialize state from LocalStorage or Defaults
-        function loadState() {
+        // Firebase Setup & Realtime Listener Initialization
+        async function initFirebase() {
             try {
-                const saved = localStorage.getItem(STORAGE_KEY);
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                    apiKey: "demo-key",
+                    authDomain: "demo-app.firebaseapp.com",
+                    projectId: "demo-app",
+                    storageBucket: "demo-app.appspot.com",
+                    messagingSenderId: "123456789",
+                    appId: "1:123456789:web:demo"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Authentication step
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Public document path according to mandatory guidelines
+                docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tracker', 'state');
+
+                // Realtime Listener
+                onSnapshot(docRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        teams = data.teams || [...defaultTeams];
+                        gamesList = data.gamesList || [...defaultGames];
+                    } else {
+                        // Seed initial state
+                        teams = [...defaultTeams];
+                        gamesList = [...defaultGames];
+                        saveStateToCloud();
+                    }
+                    renderTeams();
+                    renderGamesListIfOpen();
+                }, (error) => {
+                    console.error("Firestore listen error, using local fallback state", error);
+                    fallbackLocalState();
+                });
+
+            } catch (err) {
+                console.warn("Firebase initialization failed, operating in offline state mode", err);
+                fallbackLocalState();
+            }
+        }
+
+        function fallbackLocalState() {
+            try {
+                const saved = localStorage.getItem('ukm_seal_tracker_data');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     teams = parsed.teams || defaultTeams;
@@ -338,31 +397,36 @@
                 } else {
                     teams = [...defaultTeams];
                     gamesList = [...defaultGames];
-                    saveState();
                 }
             } catch (e) {
-                console.error("LocalStorage load failed, fallback to defaults", e);
                 teams = [...defaultTeams];
                 gamesList = [...defaultGames];
             }
+            renderTeams();
         }
 
-        function saveState() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        async function saveStateToCloud() {
+            if (docRef && auth.currentUser) {
+                try {
+                    await setDoc(docRef, {
+                        teams: teams,
+                        gamesList: gamesList,
+                        updatedAt: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.error("Failed writing state to cloud:", e);
+                }
+            } else {
+                localStorage.setItem('ukm_seal_tracker_data', JSON.stringify({
                     teams: teams,
-                    gamesList: gamesList,
-                    updatedAt: new Date().toISOString()
+                    gamesList: gamesList
                 }));
-            } catch (e) {
-                console.error("LocalStorage save failed", e);
             }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            loadState();
+            initFirebase();
             attachEventListeners();
-            renderTeams();
         });
 
         function attachEventListeners() {
@@ -404,7 +468,7 @@
 
             document.getElementById('btnAddTeam').addEventListener('click', () => {
                 if (!isAdmin) return;
-                showPrompt("Tambah Kelompok", "Masukkan Nama Kelompok Baru:", "", (newName) => {
+                showPrompt("Tambah Kelompok Baru", "Masukkan Nama Kelompok Baru:", "", (newName) => {
                     if (newName && newName.trim() !== "") {
                         const newId = teams.length > 0 ? Math.max(...teams.map(t => t.id)) + 1 : 1;
                         teams.push({
@@ -412,7 +476,7 @@
                             name: newName.trim(),
                             completedGames: []
                         });
-                        saveState();
+                        saveStateToCloud();
                         renderTeams();
                     }
                 });
@@ -425,7 +489,7 @@
                     "Apakah Anda yakin ingin mengosongkan perolehan bintang semua kelompok?",
                     () => {
                         teams.forEach(t => t.completedGames = []);
-                        saveState();
+                        saveStateToCloud();
                         renderTeams();
                     }
                 );
@@ -484,6 +548,7 @@
 
         function renderTeams() {
             const container = document.getElementById('teamsContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             document.getElementById('teamsCountLabel').innerText = `${teams.length} Kelompok`;
@@ -628,6 +693,7 @@
 
         function attachCardEventListeners() {
             const container = document.getElementById('teamsContainer');
+            if (!container) return;
             
             container.onclick = function(e) {
                 const targetBtn = e.target.closest('[data-action]');
@@ -674,7 +740,7 @@
                 isAdding = true;
             }
 
-            saveState();
+            saveStateToCloud();
             renderTeams();
 
             if (isAdding && event) {
@@ -719,13 +785,12 @@
             showPrompt("Ubah Nama Kelompok", "Masukkan Nama Kelompok Baru:", team.name, (newName) => {
                 if (newName && newName.trim() !== "") {
                     team.name = newName.trim();
-                    saveState();
+                    saveStateToCloud();
                     renderTeams();
                 }
             });
         }
 
-        // FIXED DELETE TEAM FEATURE
         function deleteTeam(id) {
             const team = teams.find(t => t.id === id);
             if (!team) return;
@@ -734,9 +799,8 @@
                 "Hapus Kelompok",
                 `Apakah Anda yakin ingin menghapus "${team.name}"? Semua data perolehan bintang kelompok ini akan hilang.`,
                 () => {
-                    // Remove group from array
                     teams = teams.filter(t => t.id !== id);
-                    saveState();
+                    saveStateToCloud();
                     renderTeams();
                 }
             );
@@ -751,8 +815,16 @@
             document.getElementById('gamesModal').classList.add('hidden');
         }
 
+        function renderGamesListIfOpen() {
+            const gamesModal = document.getElementById('gamesModal');
+            if (gamesModal && !gamesModal.classList.contains('hidden')) {
+                renderGamesList();
+            }
+        }
+
         function renderGamesList() {
             const container = document.getElementById('gamesListContainer');
+            if (!container) return;
             container.innerHTML = '';
 
             if (gamesList.length === 0) {
@@ -807,7 +879,7 @@
             if (val) {
                 gamesList.push(val);
                 input.value = '';
-                saveState();
+                saveStateToCloud();
                 renderGamesList();
                 renderTeams();
             }
@@ -817,24 +889,22 @@
             showPrompt("Ubah Nama Game", "Masukkan Nama Game Baru:", gamesList[index], (newName) => {
                 if (newName && newName.trim() !== "") {
                     gamesList[index] = newName.trim();
-                    saveState();
+                    saveStateToCloud();
                     renderGamesList();
                     renderTeams();
                 }
             });
         }
 
-        // FIXED DELETE GAME FEATURE
         function removeGameItem(index) {
             const gameName = gamesList[index];
             showConfirm(
                 "Hapus Game",
                 `Apakah Anda yakin ingin menghapus game "${gameName}"?`,
                 () => {
-                    // 1. Remove game from games array
                     gamesList.splice(index, 1);
                     
-                    // 2. Adjust or strip game index references in each group's completed list
+                    // Adjust game index references across all teams
                     teams.forEach(team => {
                         if (team.completedGames) {
                             team.completedGames = team.completedGames
@@ -843,8 +913,7 @@
                         }
                     });
 
-                    // 3. Save state & refresh components immediately
-                    saveState();
+                    saveStateToCloud();
                     renderGamesList();
                     renderTeams();
                 }
@@ -897,7 +966,6 @@
 
         function showNoticeModal(title, msg) {
             showConfirm(title, msg, () => {});
-            // Hide confirmation action button for notice mode
             document.getElementById('btnConfirmOk').classList.add('hidden');
             document.getElementById('btnConfirmCancel').innerText = 'Tutup';
             document.getElementById('btnConfirmCancel').className = 'w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-2.5 rounded-xl cursor-pointer';
