@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UKM SEAL - Games Tracker</title>
-    
-    <!-- Tailwind CSS -->
+    <title>UKM SEAL Games Tracker</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts & Font Awesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Canvas Confetti Library -->
+    <!-- Canvas Confetti CDN -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
+    
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -24,76 +20,61 @@
             theme: {
                 extend: {
                     colors: {
-                        pinkPastel: '#FFD6E0',
-                        pinkPastelLight: '#FFF0F5',
-                        pinkAccent: '#FF70A6',
-                        yellowPastel: '#FFFAA0',
-                        yellowAccent: '#FFD166',
-                        bgPastel: '#FAF8F5'
+                        'soft-pink': '#FDE8E8',
+                        'soft-pink-dark': '#FCA5A5',
+                        'accent-pink': '#F43F5E',
+                        'soft-yellow': '#FEF3C7',
+                        'soft-yellow-dark': '#FDE047',
+                        'accent-yellow': '#EAB308',
+                        'bg-pastel': '#FFF8F6',
                     },
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        display: ['Fredoka', 'cursive'],
+                        sans: ['Poppins', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #FAF8F5;
-            background-image: radial-gradient(#FFD6E0 0.8px, transparent 0.8px), radial-gradient(#FFD166 0.8px, #FAF8F5 0.8px);
-            background-size: 32px 32px;
-            background-position: 0 0, 16px 16px;
-        }
-        .custom-card-shadow {
-            box-shadow: 0 8px 24px -4px rgba(255, 112, 166, 0.12), 0 4px 12px -2px rgba(255, 209, 102, 0.15);
-        }
-        .star-pop {
-            animation: starPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes starPop {
-            0% { transform: scale(0); }
-            70% { transform: scale(1.3); }
+        body { font-family: 'Poppins', sans-serif; background-color: #FFF8F6; }
+        .star-glow { filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.8)); }
+        .star-pop { animation: pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop {
+            0% { transform: scale(0.7); }
+            50% { transform: scale(1.35); }
             100% { transform: scale(1); }
         }
-        .modal-animate {
-            animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes modalFadeIn {
-            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
+        .card-shadow { box-shadow: 0 12px 30px -5px rgba(244, 63, 94, 0.08), 0 8px 15px -6px rgba(234, 179, 8, 0.08); }
     </style>
 </head>
-<body class="text-slate-700 min-h-screen flex flex-col font-sans selection:bg-pinkPastel selection:text-pinkAccent">
+<body class="text-slate-700 min-h-screen pb-16">
 
-    <!-- Sticky Header -->
-    <header class="bg-white/80 backdrop-blur-md border-b border-pinkPastel/60 sticky top-0 z-30 shadow-sm transition-all">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pinkAccent to-yellowAccent flex items-center justify-center text-white text-xl font-bold shadow-sm shadow-pinkAccent/30">
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-rose-200 via-pink-100 to-amber-100 border-b border-rose-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-400 to-amber-300 flex items-center justify-center text-white font-extrabold text-xl shadow-md">
                     🦭
                 </div>
                 <div>
-                    <h1 class="font-display font-bold text-lg md:text-xl text-slate-800 tracking-wide leading-none">UKM SEAL</h1>
-                    <p class="text-xs text-slate-500 font-medium">Games & Star Tracker 🏆</p>
+                    <h1 class="font-extrabold text-lg md:text-xl text-rose-600 tracking-tight leading-none">UKM SEAL</h1>
+                    <p class="text-xs font-medium text-amber-700">Games & Star Tracker 🏆</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Sync Badge -->
-                <span id="syncIndicator" class="text-[11px] bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
+                <span id="syncIndicator" class="text-[11px] bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live
+                </span>
+                <span id="adminBadge" class="hidden text-xs bg-rose-500 text-white font-semibold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                    <i class="fa-solid fa-user-shield text-[10px]"></i> Mode Admin
+                </span>
+                <span id="userBadge" class="text-xs bg-amber-200 text-amber-800 font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <i class="fa-solid fa-eye text-[10px]"></i> Mode Peserta
                 </span>
 
-                <!-- Mode Indicator Badge -->
-                <span id="modeBadge" class="text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5 bg-yellowPastel/80 text-amber-800 border border-yellowAccent/40">
-                    <i class="fa-solid fa-eye text-amber-600"></i> Mode Peserta
-                </span>
-
-                <!-- Mode Toggle Button -->
-                <button id="adminAuthBtn" onclick="handleAdminToggle()" class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 bg-white border-pinkPastel hover:bg-pinkPastelLight text-pinkAccent shadow-sm">
+                <button id="toggleAdminBtn" onclick="openAdminAuthModal()" class="text-xs bg-white hover:bg-rose-50 text-rose-600 font-bold px-3 py-1.5 rounded-xl border border-rose-200 transition-all shadow-sm flex items-center gap-1.5">
                     <i class="fa-solid fa-lock" id="lockIcon"></i>
                     <span id="adminBtnText">Masuk Admin</span>
                 </button>
@@ -101,104 +82,117 @@
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 pt-6">
 
-        <!-- Top Banner / Hero -->
-        <div class="bg-gradient-to-r from-pinkPastel/60 via-pinkPastelLight to-yellowPastel/60 border border-pinkPastel rounded-3xl p-5 md:p-6 custom-card-shadow flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
-            <div class="space-y-1 z-10">
-                <span class="inline-block px-3 py-1 bg-white/80 backdrop-blur-sm text-pinkAccent text-[11px] font-bold rounded-full border border-pinkPastel uppercase tracking-wider mb-1">Papan Skor Realtime</span>
-                <h2 class="text-xl md:text-2xl font-display font-bold text-slate-800">Kumpulkan 5 Bintang Hadiah! 🎉</h2>
-                <p class="text-xs md:text-sm text-slate-600 max-w-xl">
-                    Setiap game hanya bisa dimenangkan oleh 1 kelompok. Kelompok yang mengumpulkan 5 bintang penuh berhak mendapatkan hadiah spesial!
-                </p>
-            </div>
+        <!-- Banner Info & Admin Toolbar -->
+        <div class="bg-gradient-to-br from-amber-100/80 via-pink-50 to-rose-100/80 border border-pink-200/60 rounded-3xl p-5 mb-8 card-shadow relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+                <div>
+                    <span class="bg-rose-400 text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full mb-1 inline-block">Progres Kelompok</span>
+                    <h2 class="text-2xl font-bold text-slate-800">Kumpulkan 5 Bintang Hadiah! 🎉</h2>
+                    <p class="text-sm text-slate-600 mt-0.5">Setiap game hanya bisa dimenangkan oleh 1 kelompok. Kumpulkan 5 bintang penuh untuk klaim hadiah!</p>
+                </div>
 
-            <!-- Admin Toolbar Actions -->
-            <div id="adminToolbar" class="hidden z-10 flex-wrap items-center gap-2">
-                <button onclick="openAddGameModal()" class="bg-gradient-to-r from-yellowAccent to-amber-400 hover:from-amber-400 hover:to-amber-500 text-slate-900 font-bold text-xs px-4 py-2.5 rounded-2xl transition-all shadow-md shadow-amber-200 flex items-center gap-2">
-                    <i class="fa-solid fa-plus-circle text-sm"></i> Tambah Game
-                </button>
-                <button onclick="openAddGroupModal()" class="bg-gradient-to-r from-pinkAccent to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white font-bold text-xs px-4 py-2.5 rounded-2xl transition-all shadow-md shadow-pink-200 flex items-center gap-2">
-                    <i class="fa-solid fa-users text-sm"></i> Tambah Kelompok
-                </button>
+                <div id="adminToolbar" class="hidden flex-wrap items-center gap-2">
+                    <button onclick="openAddGameModal()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus-circle"></i> Tambah Game
+                    </button>
+                    <button onclick="openAddGroupModal()" class="bg-rose-400 hover:bg-rose-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-users"></i> Tambah Kelompok
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Section: Game List Summary -->
-        <section class="space-y-3">
-            <div class="flex items-center justify-between">
-                <h3 class="font-display font-bold text-base text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-gamepad text-pinkAccent"></i> Daftar Game Terdaftar
+        <!-- Section List Game Atas -->
+        <section class="mb-8">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-rose-400"></i> Daftar Game Acara
                 </h3>
-                <span id="gameCountBadge" class="text-xs bg-pinkPastel/60 text-pinkAccent border border-pinkPastel px-2.5 py-0.5 rounded-full font-bold">0 Game</span>
+                <span id="gameCountTag" class="text-xs bg-rose-100 text-rose-600 font-semibold px-2.5 py-0.5 rounded-full">0 Game</span>
             </div>
 
-            <div id="gameListContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                <!-- Dynamic Game Pills -->
+            <div id="gameListContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                <!-- Game Pills Dynamic -->
             </div>
         </section>
 
-        <!-- Section: Group Leaderboard Grid -->
-        <section class="space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="font-display font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-trophy text-amber-500"></i> Progress Kelompok
+        <!-- Section Cards Kelompok -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400"></i> Papan Skor Kelompok
                 </h3>
             </div>
 
-            <div id="groupsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Dynamic Group Cards -->
+            <div id="groupsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Group Cards Dynamic -->
             </div>
         </section>
     </main>
 
-    <!-- Custom Modal Dialog (Generic Admin Prompts & Confirms) -->
-    <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-pinkPastel modal-animate space-y-4">
-            <div class="text-center space-y-2">
-                <div id="modalIconContainer" class="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center text-xl bg-pinkPastelLight text-pinkAccent">
-                    <i class="fa-solid fa-circle-info"></i>
-                </div>
-                <h4 id="modalTitle" class="font-display font-bold text-slate-800 text-lg">Judul Modal</h4>
-                <p id="modalDescription" class="text-xs text-slate-500">Keterangan modal pesan di sini.</p>
+    <!-- Modal Admin Auth -->
+    <div id="adminAuthModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-100 text-center relative">
+            <div class="w-12 h-12 bg-rose-100 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-key"></i>
             </div>
-
-            <div id="modalInputContainer" class="hidden">
-                <input type="text" id="modalInput" class="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-pinkAccent focus:ring-2 focus:ring-pinkPastel transition-all" placeholder="Ketik di sini...">
-            </div>
-
-            <div id="modalPasswordContainer" class="hidden">
-                <input type="password" id="modalPasswordInput" class="w-full text-center tracking-widest text-lg font-bold border border-slate-200 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-pinkAccent focus:ring-2 focus:ring-pinkPastel transition-all bg-slate-50" placeholder="••••••••">
-            </div>
-
-            <div class="flex gap-2 pt-2">
-                <button id="modalCancelBtn" onclick="closeCustomModal()" class="flex-1 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Batal</button>
-                <button id="modalConfirmBtn" class="flex-1 py-2.5 text-xs font-bold text-white bg-pinkAccent hover:bg-rose-500 rounded-2xl shadow-md transition-all">Konfirmasi</button>
+            <h3 class="font-extrabold text-slate-800 text-lg">Akses Mode Admin</h3>
+            <p class="text-xs text-slate-500 mt-1 mb-4">Masukkan kata sandi admin untuk mengelola data.</p>
+            <input type="password" id="adminPinInput" placeholder="Masukkan Kata Sandi" class="w-full text-center tracking-widest text-lg font-bold border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-400 mb-4 bg-slate-50">
+            <div class="flex gap-2">
+                <button onclick="closeAdminAuthModal()" class="flex-1 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Batal</button>
+                <button onclick="verifyAdminPin()" class="flex-1 py-2.5 text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-xl shadow-md">Masuk</button>
             </div>
         </div>
     </div>
 
-    <!-- Celebration Winner Modal -->
+    <!-- Modal Game -->
+    <div id="gameModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-100 relative">
+            <h3 id="gameModalTitle" class="font-extrabold text-slate-800 text-lg mb-1">Tambah Game</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan nama game/permainan baru.</p>
+            <input type="text" id="gameNameInput" placeholder="Contoh: Estafet Tepung" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-400 mb-4 text-sm">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeGameModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Batal</button>
+                <button onclick="saveGame()" class="px-4 py-2 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-md">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kelompok -->
+    <div id="groupModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 relative">
+            <h3 id="groupModalTitle" class="font-extrabold text-slate-800 text-lg mb-1">Tambah Kelompok</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan nama kelompok baru.</p>
+            <input type="text" id="groupNameInput" placeholder="Contoh: Kelompok 1 - Seal Super" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-rose-400 mb-4 text-sm">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeGroupModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Batal</button>
+                <button onclick="saveGroup()" class="px-4 py-2 text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-xl shadow-md">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Hadiah -->
     <div id="winnerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-gradient-to-b from-white via-pinkPastelLight to-yellowPastel/50 rounded-3xl max-w-sm w-full p-6 text-center border-2 border-yellowAccent shadow-2xl modal-animate space-y-4 relative">
-            <div class="w-20 h-20 bg-gradient-to-tr from-yellowAccent to-amber-400 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white text-3xl text-white">
+        <div class="bg-gradient-to-b from-white via-rose-50 to-amber-50 rounded-3xl max-w-sm w-full p-6 text-center border-2 border-amber-300 shadow-2xl relative">
+            <div class="w-20 h-20 bg-gradient-to-tr from-amber-300 to-yellow-400 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg border-4 border-white text-3xl">
                 🏆
             </div>
-            <div>
-                <span class="bg-pinkAccent text-white text-[10px] font-extrabold tracking-widest uppercase px-3 py-1 rounded-full">5/5 Bintang Penuh</span>
-                <h3 id="winnerName" class="font-display font-bold text-2xl text-slate-800 mt-2">Nama Kelompok</h3>
-                <p class="text-xs text-slate-600 mt-1">Selamat! Kelompok ini berhasil mengumpulkan 5 bintang penuh dan BERHAK MENDAPATKAN HADIAH! 🎁✨</p>
-            </div>
-            <button onclick="closeWinnerModal()" class="w-full py-3 bg-gradient-to-r from-pinkAccent to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-md hover:opacity-95 transition-all">
+            <span class="bg-rose-500 text-white text-[10px] font-extrabold tracking-widest uppercase px-3 py-1 rounded-full">5/5 Bintang Penuh</span>
+            <h3 id="winnerName" class="font-black text-2xl text-slate-800 mt-2 mb-1">Kelompok 1</h3>
+            <p class="text-xs text-slate-600 mb-5">Selamat! Kelompok ini mengumpulkan 5 bintang penuh dan BERHAK MENDAPATKAN HADIAH! 🎁✨</p>
+            <button onclick="closeWinnerModal()" class="w-full py-3 bg-gradient-to-r from-rose-400 to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-md hover:opacity-95 transition-all">
                 Klaim Hadiah 🎉
             </button>
         </div>
     </div>
 
-    <!-- App Logic Script -->
+    <!-- Logic Script with Realtime Firebase DB -->
     <script>
-        // Inisialisasi Firebase Database menggunakan URL milikmu
+        // Realtime Firebase Database URL Milikmu
         const firebaseConfig = {
             databaseURL: "https://seal-games-tracker-3cbcf-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
@@ -211,8 +205,10 @@
 
         let isAdmin = false;
         const ADMIN_PIN = "seal2026";
+        let editingGameId = null;
+        let editingGroupId = null;
 
-        // State Awal (Benar-benar kosong 0 game)
+        // Kosongkan game secara default
         let state = {
             games: [],
             groups: [
@@ -224,7 +220,6 @@
             ]
         };
 
-        // Realtime Listener
         function initRealtimeSync() {
             stateRef.on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -246,24 +241,23 @@
             stateRef.set(state);
         }
 
-        // Render All UI
         function renderUI() {
-            renderGameList();
-            renderGroupsGrid();
-            updateAdminHeaderUI();
+            renderGamesList();
+            renderGroups();
+            updateAdminUI();
         }
 
-        function renderGameList() {
+        function renderGamesList() {
             const container = document.getElementById('gameListContainer');
-            const countBadge = document.getElementById('gameCountBadge');
+            const countTag = document.getElementById('gameCountTag');
             container.innerHTML = '';
 
-            countBadge.innerText = `${state.games.length} Game Terdaftar`;
+            countTag.innerText = `${state.games.length} Game Terdaftar`;
 
             if (state.games.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full py-4 px-4 border border-dashed border-pinkPastel bg-white/60 rounded-2xl text-center">
-                        <p class="text-xs text-slate-400">Daftar game belum diisi. Masuk Mode Admin untuk menambah game.</p>
+                    <div class="col-span-full py-4 px-4 border border-dashed border-amber-200 bg-amber-50/50 rounded-2xl text-center">
+                        <p class="text-xs text-amber-700">Daftar game belum diisi. Masuk Mode Admin untuk menambah game.</p>
                     </div>
                 `;
                 return;
@@ -275,24 +269,22 @@
                 const pill = document.createElement('div');
                 pill.className = `p-3 rounded-2xl border text-xs flex items-center justify-between transition-all ${
                     winnerGroup 
-                        ? 'bg-yellowPastel/60 border-yellowAccent/60 text-slate-800' 
-                        : 'bg-white border-pinkPastel/60 text-slate-700'
+                        ? 'bg-amber-100/80 border-amber-300 text-amber-900 font-medium' 
+                        : 'bg-white border-slate-200/80 text-slate-700'
                 }`;
 
                 pill.innerHTML = `
                     <div class="flex items-center gap-2 truncate">
-                        <span class="w-5 h-5 rounded-lg bg-pinkPastel text-pinkAccent font-bold flex items-center justify-center text-[10px] shrink-0">${index + 1}</span>
+                        <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-500 font-bold flex items-center justify-center text-[10px] shrink-0">${index + 1}</span>
                         <div class="truncate">
                             <p class="font-semibold truncate">${escapeHtml(game.name)}</p>
-                            ${winnerGroup 
-                                ? `<p class="text-[10px] text-amber-700 font-medium flex items-center gap-1"><i class="fa-solid fa-trophy text-[9px] text-amber-500"></i> ${escapeHtml(winnerGroup.name)}</p>` 
-                                : `<p class="text-[10px] text-slate-400">Belum ada pemenang</p>`}
+                            ${winnerGroup ? `<p class="text-[10px] text-amber-700 flex items-center gap-1"><i class="fa-solid fa-trophy text-[9px]"></i> ${escapeHtml(winnerGroup.name)}</p>` : `<p class="text-[10px] text-slate-400">Belum ada pemenang</p>`}
                         </div>
                     </div>
                     ${isAdmin ? `
                         <div class="flex items-center gap-1 ml-2 shrink-0">
                             <button onclick="openEditGameModal('${game.id}')" class="text-slate-400 hover:text-amber-600 p-1"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="confirmDeleteGame('${game.id}')" class="text-slate-400 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteGame('${game.id}')" class="text-slate-400 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     ` : ''}
                 `;
@@ -300,8 +292,8 @@
             });
         }
 
-        function renderGroupsGrid() {
-            const container = document.getElementById('groupsGrid');
+        function renderGroups() {
+            const container = document.getElementById('groupsContainer');
             container.innerHTML = '';
 
             state.groups.forEach((group) => {
@@ -309,24 +301,20 @@
                 const currentStars = Math.min(5, completed.length);
 
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-3xl p-5 border ${
-                    currentStars === 5 ? 'border-yellowAccent ring-2 ring-yellowPastel' : 'border-pinkPastel/60'
-                } custom-card-shadow flex flex-col justify-between transition-all relative overflow-hidden`;
+                card.className = `bg-white rounded-3xl p-5 border ${currentStars === 5 ? 'border-amber-300 ring-2 ring-amber-200' : 'border-rose-100'} card-shadow flex flex-col justify-between relative overflow-hidden transition-all`;
 
-                // Star HTML
                 let starsHTML = '';
                 for (let i = 1; i <= 5; i++) {
                     if (i <= currentStars) {
-                        starsHTML += `<i class="fa-solid fa-star text-amber-400 text-xl star-pop"></i>`;
+                        starsHTML += `<i class="fa-solid fa-star text-amber-400 text-xl star-glow star-pop"></i>`;
                     } else {
                         starsHTML += `<i class="fa-solid fa-star text-slate-200 text-xl"></i>`;
                     }
                 }
 
-                // Checklist Games HTML
                 let gamesChecklistHTML = '';
                 if (state.games.length === 0) {
-                    gamesChecklistHTML = `<p class="text-xs text-slate-400 italic py-2 text-center">Belum ada game terdaftar.</p>`;
+                    gamesChecklistHTML = `<p class="text-xs text-slate-400 italic py-2 text-center">Daftar game belum diisi oleh admin.</p>`;
                 } else {
                     state.games.forEach((game) => {
                         const isChecked = completed.includes(game.id);
@@ -336,12 +324,12 @@
                         let statusDisabled = !isAdmin;
                         
                         if (isChecked) {
-                            statusStyle = 'bg-pinkPastelLight border-pinkPastel text-pinkAccent font-semibold';
+                            statusStyle = 'bg-rose-50 border-rose-200 text-rose-700 font-semibold';
                         } else if (wonByOtherGroup) {
                             statusStyle = 'bg-slate-50 border-slate-100 text-slate-400 opacity-60';
                             statusDisabled = true;
                         } else {
-                            statusStyle = 'bg-slate-50/60 border-slate-100 text-slate-600 hover:bg-pinkPastelLight/50';
+                            statusStyle = 'bg-slate-50/60 border-slate-100 text-slate-600 hover:bg-rose-50/40';
                         }
 
                         gamesChecklistHTML += `
@@ -351,11 +339,11 @@
                                            ${isChecked ? 'checked' : ''} 
                                            ${statusDisabled ? 'disabled' : ''} 
                                            onchange="toggleGameForGroup('${group.id}', '${game.id}')"
-                                           class="w-4 h-4 rounded text-pinkAccent focus:ring-pinkPastel accent-pinkAccent cursor-pointer disabled:cursor-not-allowed">
+                                           class="w-4 h-4 rounded text-rose-500 focus:ring-rose-400 accent-rose-500 cursor-pointer disabled:cursor-not-allowed">
                                     <span class="truncate">${escapeHtml(game.name)}</span>
                                 </div>
                                 ${wonByOtherGroup ? `<span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">🏆 Dimenangkan ${escapeHtml(wonByOtherGroup.name)}</span>` : ''}
-                                ${isChecked ? `<span class="text-[10px] bg-pinkPastel text-pinkAccent px-2 py-0.5 rounded-md font-bold">Menang ⭐</span>` : ''}
+                                ${isChecked ? `<span class="text-[10px] bg-rose-200 text-rose-800 px-2 py-0.5 rounded-md font-bold">Menang ⭐</span>` : ''}
                             </label>
                         `;
                     });
@@ -365,24 +353,24 @@
                     <div>
                         <div class="flex justify-between items-start mb-3">
                             <div>
-                                <h4 class="font-display font-bold text-slate-800 text-base">
+                                <h4 class="font-extrabold text-slate-800 text-base flex items-center gap-1.5">
                                     ${escapeHtml(group.name)}
                                 </h4>
-                                <p class="text-xs text-slate-500 mt-0.5">Bintang: <span class="font-bold text-amber-600">${currentStars}/5</span></p>
+                                <p class="text-xs text-slate-500 mt-0.5">Terperoleh: <span class="font-bold text-amber-600">${currentStars}/5 Bintang</span></p>
                             </div>
                             ${isAdmin ? `
                                 <div class="flex items-center gap-1">
-                                    <button onclick="openEditGroupModal('${group.id}')" class="text-xs text-slate-400 hover:text-pinkAccent p-1"><i class="fa-solid fa-pen"></i></button>
-                                    <button onclick="confirmDeleteGroup('${group.id}')" class="text-xs text-slate-400 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                                    <button onclick="openEditGroupModal('${group.id}')" class="text-xs text-slate-400 hover:text-rose-500 p-1"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="deleteGroup('${group.id}')" class="text-xs text-slate-400 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             ` : ''}
                         </div>
 
-                        <div class="bg-gradient-to-r from-pinkPastelLight to-yellowPastel/40 border border-pinkPastel/60 rounded-2xl p-3 flex justify-around items-center mb-4">
+                        <div class="bg-gradient-to-r from-amber-50 to-rose-50 border border-amber-100 rounded-2xl p-3 flex justify-around items-center mb-4">
                             ${starsHTML}
                         </div>
 
-                        <div class="space-y-1.5">
+                        <div class="space-y-1.5 mb-2">
                             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Checklist Game:</p>
                             ${gamesChecklistHTML}
                         </div>
@@ -393,7 +381,6 @@
             });
         }
 
-        // Toggle Win Game
         function toggleGameForGroup(groupId, gameId) {
             if (!isAdmin) return;
 
@@ -408,14 +395,7 @@
             } else {
                 const otherGroup = state.groups.find(g => g.id !== groupId && g.completedGames && g.completedGames.includes(gameId));
                 if (otherGroup) {
-                    showCustomModal({
-                        title: "Game Sudah Dimenangkan",
-                        description: `Game ini sudah dimenangkan oleh ${otherGroup.name}!`,
-                        icon: "fa-trophy",
-                        iconColor: "text-amber-500 bg-yellowPastel",
-                        confirmText: "Mengerti",
-                        hideCancel: true
-                    });
+                    alert(`Game ini sudah dimenangkan oleh ${otherGroup.name}!`);
                     return;
                 }
                 group.completedGames.push(gameId);
@@ -430,232 +410,149 @@
             saveDataToCloud();
         }
 
-        // Admin Auth Toggle
-        function handleAdminToggle() {
+        function openAdminAuthModal() {
             if (isAdmin) {
                 isAdmin = false;
+                updateAdminUI();
                 renderUI();
             } else {
-                showCustomModal({
-                    title: "Akses Mode Admin",
-                    description: "Masukkan kata sandi admin untuk kelola data.",
-                    icon: "fa-key",
-                    iconColor: "text-pinkAccent bg-pinkPastelLight",
-                    showPassword: true,
-                    confirmText: "Masuk Admin",
-                    onConfirm: () => {
-                        const input = document.getElementById('modalPasswordInput').value;
-                        if (input === ADMIN_PIN) {
-                            isAdmin = true;
-                            closeCustomModal();
-                            renderUI();
-                        } else {
-                            alert("Kata sandi admin salah!");
-                        }
-                    }
-                });
+                document.getElementById('adminPinInput').value = '';
+                document.getElementById('adminAuthModal').classList.remove('hidden');
             }
         }
 
-        function updateAdminHeaderUI() {
-            const modeBadge = document.getElementById('modeBadge');
-            const adminBtnText = document.getElementById('adminBtnText');
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
+
+        function verifyAdminPin() {
+            const inputPin = document.getElementById('adminPinInput').value;
+            if (inputPin === ADMIN_PIN) {
+                isAdmin = true;
+                closeAdminAuthModal();
+                updateAdminUI();
+                renderUI();
+            } else {
+                alert("Kata sandi admin salah!");
+            }
+        }
+
+        function updateAdminUI() {
+            const adminBadge = document.getElementById('adminBadge');
+            const userBadge = document.getElementById('userBadge');
             const lockIcon = document.getElementById('lockIcon');
+            const adminBtnText = document.getElementById('adminBtnText');
             const adminToolbar = document.getElementById('adminToolbar');
 
             if (isAdmin) {
-                modeBadge.className = "text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5 bg-pinkAccent text-white border border-pinkAccent shadow-sm";
-                modeBadge.innerHTML = `<i class="fa-solid fa-user-shield text-white"></i> Mode Admin`;
-                
-                adminBtnText.innerText = "Keluar Admin";
+                adminBadge.classList.remove('hidden');
+                userBadge.classList.add('hidden');
                 lockIcon.className = "fa-solid fa-unlock";
-                
+                adminBtnText.innerText = "Keluar Admin";
                 adminToolbar.classList.remove('hidden');
                 adminToolbar.classList.add('flex');
             } else {
-                modeBadge.className = "text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5 bg-yellowPastel/80 text-amber-800 border border-yellowAccent/40";
-                modeBadge.innerHTML = `<i class="fa-solid fa-eye text-amber-600"></i> Mode Peserta`;
-                
-                adminBtnText.innerText = "Masuk Admin";
+                adminBadge.classList.add('hidden');
+                userBadge.classList.remove('hidden');
                 lockIcon.className = "fa-solid fa-lock";
-                
+                adminBtnText.innerText = "Masuk Admin";
                 adminToolbar.classList.add('hidden');
                 adminToolbar.classList.remove('flex');
             }
         }
 
-        // Add / Edit Game
         function openAddGameModal() {
-            showCustomModal({
-                title: "Tambah Game Baru",
-                description: "Masukkan nama game/permainan baru.",
-                icon: "fa-gamepad",
-                iconColor: "text-pinkAccent bg-pinkPastelLight",
-                showInput: true,
-                inputPlaceholder: "Contoh: Estafet Tepung",
-                confirmText: "Simpan",
-                onConfirm: () => {
-                    const name = document.getElementById('modalInput').value.trim();
-                    if (!name) return;
-                    state.games.push({ id: 'game_' + Date.now(), name: name });
-                    closeCustomModal();
-                    saveDataToCloud();
-                }
-            });
+            editingGameId = null;
+            document.getElementById('gameModalTitle').innerText = "Tambah Game Baru";
+            document.getElementById('gameNameInput').value = '';
+            document.getElementById('gameModal').classList.remove('hidden');
         }
 
         function openEditGameModal(gameId) {
+            editingGameId = gameId;
             const game = state.games.find(g => g.id === gameId);
             if (!game) return;
-
-            showCustomModal({
-                title: "Edit Nama Game",
-                description: "Ubah nama game terdaftar.",
-                icon: "fa-pen",
-                iconColor: "text-amber-600 bg-yellowPastel",
-                showInput: true,
-                inputValue: game.name,
-                confirmText: "Simpan Changes",
-                onConfirm: () => {
-                    const name = document.getElementById('modalInput').value.trim();
-                    if (!name) return;
-                    game.name = name;
-                    closeCustomModal();
-                    saveDataToCloud();
-                }
-            });
+            document.getElementById('gameModalTitle').innerText = "Edit Nama Game";
+            document.getElementById('gameNameInput').value = game.name;
+            document.getElementById('gameModal').classList.remove('hidden');
         }
 
-        function confirmDeleteGame(gameId) {
-            showCustomModal({
-                title: "Hapus Game?",
-                description: "Game ini akan dihapus dari daftar dan status centang pemenang akan disesuaikan.",
-                icon: "fa-trash-can",
-                iconColor: "text-rose-500 bg-rose-50",
-                confirmText: "Hapus Game",
-                confirmColor: "bg-rose-500 hover:bg-rose-600",
-                onConfirm: () => {
-                    state.games = state.games.filter(g => g.id !== gameId);
-                    state.groups.forEach(group => {
-                        if (group.completedGames) {
-                            group.completedGames = group.completedGames.filter(id => id !== gameId);
-                        }
-                    });
-                    closeCustomModal();
-                    saveDataToCloud();
-                }
-            });
+        function closeGameModal() {
+            document.getElementById('gameModal').classList.add('hidden');
         }
 
-        // Add / Edit Group
+        function saveGame() {
+            const name = document.getElementById('gameNameInput').value.trim();
+            if (!name) return;
+
+            if (editingGameId) {
+                const game = state.games.find(g => g.id === editingGameId);
+                if (game) game.name = name;
+            } else {
+                state.games.push({
+                    id: 'game_' + Date.now(),
+                    name: name
+                });
+            }
+
+            closeGameModal();
+            saveDataToCloud();
+        }
+
+        function deleteGame(gameId) {
+            if (!confirm("Hapus game ini? Status kelulusan game di semua kelompok akan disesuaikan.")) return;
+            state.games = state.games.filter(g => g.id !== gameId);
+            state.groups.forEach(group => {
+                if (group.completedGames) {
+                    group.completedGames = group.completedGames.filter(id => id !== gameId);
+                }
+            });
+            saveDataToCloud();
+        }
+
         function openAddGroupModal() {
-            showCustomModal({
-                title: "Tambah Kelompok Baru",
-                description: "Masukkan nama kelompok peserta baru.",
-                icon: "fa-users",
-                iconColor: "text-pinkAccent bg-pinkPastelLight",
-                showInput: true,
-                inputPlaceholder: "Contoh: Kelompok 6 - Seal Hebat",
-                confirmText: "Simpan",
-                onConfirm: () => {
-                    const name = document.getElementById('modalInput').value.trim();
-                    if (!name) return;
-                    state.groups.push({ id: 'group_' + Date.now(), name: name, completedGames: [] });
-                    closeCustomModal();
-                    saveDataToCloud();
-                }
-            });
+            editingGroupId = null;
+            document.getElementById('groupModalTitle').innerText = "Tambah Kelompok";
+            document.getElementById('groupNameInput').value = '';
+            document.getElementById('groupModal').classList.remove('hidden');
         }
 
         function openEditGroupModal(groupId) {
+            editingGroupId = groupId;
             const group = state.groups.find(g => g.id === groupId);
             if (!group) return;
-
-            showCustomModal({
-                title: "Edit Nama Kelompok",
-                description: "Ubah nama kelompok peserta.",
-                icon: "fa-pen",
-                iconColor: "text-pinkAccent bg-pinkPastelLight",
-                showInput: true,
-                inputValue: group.name,
-                confirmText: "Simpan Changes",
-                onConfirm: () => {
-                    const name = document.getElementById('modalInput').value.trim();
-                    if (!name) return;
-                    group.name = name;
-                    closeCustomModal();
-                    saveDataToCloud();
-                }
-            });
+            document.getElementById('groupModalTitle').innerText = "Edit Nama Kelompok";
+            document.getElementById('groupNameInput').value = group.name;
+            document.getElementById('groupModal').classList.remove('hidden');
         }
 
-        function confirmDeleteGroup(groupId) {
-            showCustomModal({
-                title: "Hapus Kelompok?",
-                description: "Kelompok ini akan dihapus dari papan skor.",
-                icon: "fa-trash-can",
-                iconColor: "text-rose-500 bg-rose-50",
-                confirmText: "Hapus Kelompok",
-                confirmColor: "bg-rose-500 hover:bg-rose-600",
-                onConfirm: () => {
-                    state.groups = state.groups.filter(g => g.id !== groupId);
-                    closeCustomModal();
-                    saveDataToCloud();
-                }
-            });
+        function closeGroupModal() {
+            document.getElementById('groupModal').classList.add('hidden');
         }
 
-        // Generic Modal Handler
-        function showCustomModal(opts) {
-            const modal = document.getElementById('customModal');
-            document.getElementById('modalTitle').innerText = opts.title || 'Informasi';
-            document.getElementById('modalDescription').innerText = opts.description || '';
-            
-            const iconContainer = document.getElementById('modalIconContainer');
-            iconContainer.className = `w-12 h-12 rounded-2xl mx-auto flex items-center justify-center text-xl ${opts.iconColor || 'text-pinkAccent bg-pinkPastelLight'}`;
-            iconContainer.innerHTML = `<i class="fa-solid ${opts.icon || 'fa-info'}"></i>`;
+        function saveGroup() {
+            const name = document.getElementById('groupNameInput').value.trim();
+            if (!name) return;
 
-            const inputContainer = document.getElementById('modalInputContainer');
-            const input = document.getElementById('modalInput');
-            if (opts.showInput) {
-                inputContainer.classList.remove('hidden');
-                input.value = opts.inputValue || '';
-                input.placeholder = opts.inputPlaceholder || 'Ketik di sini...';
+            if (editingGroupId) {
+                const group = state.groups.find(g => g.id === editingGroupId);
+                if (group) group.name = name;
             } else {
-                inputContainer.classList.add('hidden');
+                state.groups.push({
+                    id: 'group_' + Date.now(),
+                    name: name,
+                    completedGames: []
+                });
             }
 
-            const passContainer = document.getElementById('modalPasswordContainer');
-            const passInput = document.getElementById('modalPasswordInput');
-            if (opts.showPassword) {
-                passContainer.classList.remove('hidden');
-                passInput.value = '';
-            } else {
-                passContainer.classList.add('hidden');
-            }
-
-            const cancelBtn = document.getElementById('modalCancelBtn');
-            if (opts.hideCancel) {
-                cancelBtn.classList.add('hidden');
-            } else {
-                cancelBtn.classList.remove('hidden');
-            }
-
-            const confirmBtn = document.getElementById('modalConfirmBtn');
-            confirmBtn.innerText = opts.confirmText || 'Konfirmasi';
-            confirmBtn.className = `flex-1 py-2.5 text-xs font-bold text-white rounded-2xl shadow-md transition-all ${opts.confirmColor || 'bg-pinkAccent hover:bg-rose-500'}`;
-            
-            confirmBtn.onclick = () => {
-                if (opts.onConfirm) opts.onConfirm();
-            };
-
-            modal.classList.remove('hidden');
-            if (opts.showInput) setTimeout(() => input.focus(), 100);
-            if (opts.showPassword) setTimeout(() => passInput.focus(), 100);
+            closeGroupModal();
+            saveDataToCloud();
         }
 
-        function closeCustomModal() {
-            document.getElementById('customModal').classList.add('hidden');
+        function deleteGroup(groupId) {
+            if (!confirm("Hapus kelompok ini?")) return;
+            state.groups = state.groups.filter(g => g.id !== groupId);
+            saveDataToCloud();
         }
 
         function triggerWinnerCelebration(groupName) {
